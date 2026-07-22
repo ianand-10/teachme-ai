@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#17233c" />
+    <title>TeachBack Academy</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="TeachBack Academy home"><span>✦</span> TEACHBACK<br /><small>ACADEMY</small></a>
+        <div class="stats" aria-label="Player progress"><span>⚡ <b id="xp-value">0</b> XP</span><span>🔥 <b id="streak-value">0</b> day streak</span></div>
+        <button class="icon-button" id="report-button" aria-label="Open report card">▤</button>
+      </header>
+      <section class="game-frame">
+        <canvas id="game" width="960" height="576" aria-label="A pixel art school. Use WASD or arrow keys to walk."></canvas>
+        <div class="game-hint" id="game-hint">WASD / ARROW KEYS TO EXPLORE</div>
+      </section>
+      <section class="lower-bar">
+        <p id="location-label">HALLWAY · Choose a classroom</p>
+        <button class="primary-button" id="topic-button">+ Create a classroom</button>
+      </section>
+    </main>
+
+    <dialog id="topic-dialog" class="modal small-modal">
+      <form method="dialog" id="topic-form">
+        <button class="close" value="cancel" aria-label="Close">×</button>
+        <p class="eyebrow">NEW CLASSROOM</p><h2>What will you teach?</h2>
+        <label>Topic <input id="topic-name" required maxlength="32" placeholder="e.g. Photosynthesis" /></label>
+        <label>Student name <input id="persona-name" required maxlength="22" placeholder="e.g. Maya" /></label>
+        <label>Student personality <select id="persona-style"><option value="curious">Curious and enthusiastic</option><option value="careful">Careful and analytical</option><option value="creative">Creative and imaginative</option></select></label>
+        <button class="primary-button" type="submit">Create classroom</button>
+      </form>
+    </dialog>
+
+    <dialog id="teach-dialog" class="modal teach-modal">
+      <section class="lesson-head"><div class="student-portrait" id="portrait">M</div><div><p class="eyebrow" id="lesson-topic">SCIENCE</p><h2 id="lesson-title">Teach Maya</h2><p id="lesson-subtitle">Explain it in your own words. I’ll ask questions.</p></div><button class="close" id="end-lesson" aria-label="End lesson">×</button></section>
+      <div id="conversation" class="conversation" aria-live="polite"></div>
+      <form id="teach-form" class="teach-form"><input id="teach-input" autocomplete="off" placeholder="Start teaching…" /><button class="primary-button">Send</button></form>
+      <p class="tiny">This demo keeps your lessons on this device. Connect an AI provider later for real student responses.</p>
+    </dialog>
+
+    <dialog id="report-dialog" class="modal small-modal report-modal">
+      <button class="close" id="close-report" aria-label="Close">×</button><p class="eyebrow">YOUR PROGRESS</p><h2>Report card</h2>
+      <div class="score"><strong id="report-xp">0</strong><span>Total XP</span></div><div id="report-list" class="report-list"></div>
+    </dialog>
+    <script src="game.js"></script>
+  </body>
+</html>
