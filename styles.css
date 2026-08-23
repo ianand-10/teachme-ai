@@ -1,1 +1,280 @@
-:root{color-scheme:dark;--ink:#19233b;--paper:#f8f1da;--cream:#fff9e9;--gold:#f7bd4e;--coral:#ef7065;--blue:#4d86c8}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 0,#31476a,#10182b 65%);font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif;color:var(--paper);letter-spacing:.02em}.app-shell{width:min(1080px,100%);margin:auto;padding:22px 22px 14px}.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}.brand{color:#fff7db;text-decoration:none;font-weight:900;line-height:.72;font-size:18px;letter-spacing:.1em}.brand span{color:var(--gold);font-size:25px}.brand small{font-size:10px;letter-spacing:.31em;margin-left:28px}.stats{display:flex;gap:22px;font-size:14px;color:#e9dbb6}.stats b{color:#fff}.icon-button,.close{border:0;background:transparent;color:inherit;cursor:pointer;font-size:26px}.game-frame{position:relative;border:7px solid #f2d99f;box-shadow:0 0 0 5px #6b493b,0 20px 44px #090e1b;line-height:0;background:#8ac9bc}canvas{width:100%;height:auto;display:block;image-rendering:pixelated;image-rendering:crisp-edges}.game-hint{position:absolute;left:0;right:0;bottom:15px;text-align:center;font-size:11px;line-height:1;color:#fff7db;text-shadow:2px 2px #27334f;pointer-events:none}.lower-bar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:18px 3px}.lower-bar p{margin:0;color:#d6c69d;font-size:13px}.primary-button{border:0;border-radius:6px;background:var(--gold);color:#3d2940;font:800 14px ui-rounded,"Trebuchet MS",sans-serif;padding:12px 16px;box-shadow:inset 0 -3px #c77f38,0 3px 0 #563b3d;cursor:pointer}.primary-button:hover{filter:brightness(1.08)}dialog{color:var(--ink);border:0;border-radius:15px;padding:0;background:var(--cream);box-shadow:0 25px 90px #050914aa}dialog::backdrop{background:#061021b8;backdrop-filter:blur(3px)}.modal{width:min(560px,calc(100vw - 32px)}.small-modal{padding:29px}.small-modal form{display:grid;gap:16px}.close{float:right;color:#6a5964;line-height:.7}.eyebrow{font-size:11px;font-weight:900;letter-spacing:.16em;color:#a36754;margin:0 0 5px}h2{font-size:27px;margin:0 0 20px;letter-spacing:-.04em}label{display:grid;gap:6px;font-size:12px;font-weight:800;color:#50404d}input,select{font:16px inherit;color:var(--ink);background:#fffdf4;border:2px solid #dccaa5;border-radius:7px;padding:10px}.teach-modal{width:min(690px,calc(100vw - 28px));padding:28px}.lesson-head{display:flex;align-items:center;gap:14px;border-bottom:2px solid #e6d6b9;padding-bottom:16px}.lesson-head h2{margin:0}.lesson-head .close{margin-left:auto}.lesson-head p:not(.eyebrow){margin:3px 0 0;color:#766772;font-size:13px}.student-portrait{width:50px;height:50px;border-radius:13px;background:var(--coral);color:#fff5d5;display:grid;place-items:center;font-weight:900;font-size:23px;box-shadow:inset 0 -6px #bf4e60}.conversation{height:270px;overflow:auto;padding:18px 0;display:grid;align-content:start;gap:13px}.bubble{max-width:80%;padding:11px 14px;border-radius:12px;font-size:14px;line-height:1.4}.bubble.student{background:#e9d8b4;border-bottom-left-radius:2px}.bubble.player{background:#9ed3d0;border-bottom-right-radius:2px;justify-self:end}.teach-form{display:flex;gap:9px}.teach-form input{flex:1}.tiny{font-size:10px;line-height:1.35;color:#876f69;margin:13px 0 0}.score{text-align:center;background:#e6d4ae;border-radius:12px;padding:14px;margin-bottom:18px}.score strong{display:block;font-size:36px;color:#b7594d}.score span{font-size:12px}.report-list{display:grid;gap:9px}.report-row{display:flex;justify-content:space-between;border-bottom:1px solid #e3d1ac;padding:7px 0;font-size:13px}.report-row span:last-child{color:#a45c4d;font-weight:800}@media(max-width:560px){.app-shell{padding:14px 8px}.stats{gap:9px;font-size:11px}.lower-bar{align-items:flex-start;flex-direction:column}.teach-modal{padding:18px}.conversation{height:245px}}
+﻿/* ── Reset & tokens ─────────────────────────────────────────────────────── */
+:root{
+  color-scheme:dark;
+  --ink:#19233b;
+  --paper:#f8f1da;
+  --cream:#fff9e9;
+  --gold:#f7bd4e;
+  --gold-dk:#c47d28;
+  --coral:#ef7065;
+  --blue:#4d86c8;
+  --shadow:#050914;
+}
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:radial-gradient(ellipse at 50% 0%,#2e4568,#0d1628 70%);
+  font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif;
+  color:var(--paper);
+  letter-spacing:.02em;
+}
+
+/* ── App shell ───────────────────────────────────────────────────────────── */
+.app-shell{
+  width:min(1080px,100%);
+  margin:auto;
+  padding:22px 22px 14px;
+}
+
+/* ── Top bar ─────────────────────────────────────────────────────────────── */
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:15px;
+}
+.brand{
+  color:#fff7db;
+  text-decoration:none;
+  font-weight:900;
+  line-height:.72;
+  font-size:18px;
+  letter-spacing:.12em;
+}
+.brand span{color:var(--gold);font-size:25px}
+.brand small{font-size:10px;letter-spacing:.31em;margin-left:28px;opacity:.8}
+.stats{display:flex;gap:22px;font-size:14px;color:#e0cfa0}
+.stats b{color:#fff}
+.icon-button,.close{
+  border:0;
+  background:transparent;
+  color:inherit;
+  cursor:pointer;
+  font-size:26px;
+  transition:opacity .15s;
+}
+.icon-button:hover,.close:hover{opacity:.7}
+
+/* ── Game canvas frame ───────────────────────────────────────────────────── */
+.game-frame{
+  position:relative;
+  border:6px solid #e8ca84;
+  box-shadow:0 0 0 4px #5a3c2e, 0 22px 50px #090e1b;
+  line-height:0;
+  background:#78b8aa;
+  image-rendering:pixelated;
+}
+canvas{
+  width:100%;
+  height:auto;
+  display:block;
+  image-rendering:pixelated;
+  image-rendering:crisp-edges;
+}
+.game-hint{
+  position:absolute;
+  left:0;right:0;bottom:14px;
+  text-align:center;
+  font-size:11px;
+  line-height:1;
+  color:#fff7db;
+  text-shadow:1px 1px 0 #1a2e48;
+  pointer-events:none;
+  letter-spacing:.1em;
+}
+
+/* ── Lower bar ───────────────────────────────────────────────────────────── */
+.lower-bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  margin:16px 3px;
+}
+.lower-bar p{margin:0;color:#c8b47e;font-size:13px;letter-spacing:.06em}
+
+/* ── Primary button ──────────────────────────────────────────────────────── */
+.primary-button{
+  border:0;
+  border-radius:6px;
+  background:var(--gold);
+  color:#3d2910;
+  font:800 14px ui-rounded,"Trebuchet MS",sans-serif;
+  padding:11px 18px;
+  box-shadow:inset 0 -3px var(--gold-dk), 0 3px 0 #4a2c10;
+  cursor:pointer;
+  transition:filter .12s, transform .08s;
+  letter-spacing:.04em;
+}
+.primary-button:hover{filter:brightness(1.1)}
+.primary-button:active{transform:translateY(2px);box-shadow:inset 0 -1px var(--gold-dk)}
+.primary-button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* ── Dialogs (shared) ────────────────────────────────────────────────────── */
+dialog{
+  color:var(--ink);
+  border:0;
+  border-radius:14px;
+  padding:0;
+  background:var(--cream);
+  box-shadow:0 28px 80px #040d1acc;
+}
+dialog::backdrop{
+  background:#051020c0;
+  backdrop-filter:blur(4px);
+}
+.modal{width:min(560px,calc(100vw - 32px))}
+.small-modal{padding:28px}
+.small-modal form{display:grid;gap:16px}
+
+.close{
+  float:right;
+  color:#6a5964;
+  line-height:.7;
+  font-size:28px;
+}
+.eyebrow{
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.18em;
+  color:#a36754;
+  margin:0 0 5px;
+  text-transform:uppercase;
+}
+h2{font-size:26px;margin:0 0 20px;letter-spacing:-.04em}
+
+label{display:grid;gap:6px;font-size:12px;font-weight:800;color:#50404d}
+input,select{
+  font:16px inherit;
+  color:var(--ink);
+  background:#fffdf4;
+  border:2px solid #dccaa5;
+  border-radius:7px;
+  padding:10px 12px;
+  transition:border-color .15s;
+}
+input:focus,select:focus{outline:none;border-color:#8baed4}
+
+/* ── Teach dialog ────────────────────────────────────────────────────────── */
+.teach-modal{
+  width:min(700px,calc(100vw - 28px));
+  padding:26px;
+}
+.lesson-head{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  border-bottom:2px solid #e2cfb2;
+  padding-bottom:16px;
+  margin-bottom:4px;
+}
+.lesson-head h2{margin:0}
+.lesson-head .close{margin-left:auto}
+.lesson-head p:not(.eyebrow){margin:4px 0 0;color:#766772;font-size:13px}
+
+.student-portrait{
+  width:52px;height:52px;
+  border-radius:12px;
+  background:var(--coral);
+  color:#fff5d5;
+  display:grid;
+  place-items:center;
+  font-weight:900;
+  font-size:24px;
+  box-shadow:inset 0 -5px #b04455;
+  flex-shrink:0;
+}
+
+.conversation{
+  height:280px;
+  overflow:auto;
+  padding:16px 0;
+  display:grid;
+  align-content:start;
+  gap:12px;
+  scroll-behavior:smooth;
+}
+
+/* ── Chat bubbles ────────────────────────────────────────────────────────── */
+.bubble{
+  max-width:80%;
+  padding:11px 15px;
+  border-radius:12px;
+  font-size:14px;
+  line-height:1.45;
+  animation:pop .18s ease;
+}
+@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.bubble.student{
+  background:#e4d2a8;
+  border-bottom-left-radius:3px;
+  border:1px solid #d0bb8a;
+}
+.bubble.player{
+  background:#9dd8d4;
+  border-bottom-right-radius:3px;
+  border:1px solid #7cbfba;
+  justify-self:end;
+}
+
+/* ── Typing indicator ────────────────────────────────────────────────────── */
+.typing-bubble{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:14px 18px;
+  min-width:60px;
+}
+.dot{
+  width:7px;height:7px;
+  border-radius:50%;
+  background:#8a7040;
+  animation:bounce 1.1s infinite ease-in-out;
+}
+.dot:nth-child(2){animation-delay:.18s}
+.dot:nth-child(3){animation-delay:.36s}
+@keyframes bounce{
+  0%,80%,100%{transform:translateY(0);opacity:.5}
+  40%{transform:translateY(-6px);opacity:1}
+}
+
+/* ── Teach input form ────────────────────────────────────────────────────── */
+.teach-form{display:flex;gap:9px;margin-top:10px}
+.teach-form input{flex:1}
+.tiny{font-size:10px;line-height:1.35;color:#876f69;margin:10px 0 0}
+
+/* ── Report dialog ───────────────────────────────────────────────────────── */
+.report-modal{padding:28px}
+.score{
+  text-align:center;
+  background:#e2cfa0;
+  border-radius:11px;
+  padding:16px;
+  margin-bottom:18px;
+  border:1px solid #c8ae7a;
+}
+.score strong{display:block;font-size:38px;color:#a84040}
+.score span{font-size:12px;color:#6a4e3a}
+.report-list{display:grid;gap:9px}
+.report-row{
+  display:flex;
+  justify-content:space-between;
+  border-bottom:1px solid #ddc898;
+  padding:8px 0;
+  font-size:13px;
+  align-items:baseline;
+  gap:8px;
+}
+.report-row small{display:block;font-size:10px;color:#9a7a62;font-weight:400;margin-top:2px}
+.report-row span:last-child{color:#a04840;font-weight:800;white-space:nowrap}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media(max-width:560px){
+  .app-shell{padding:14px 8px}
+  .stats{gap:9px;font-size:11px}
+  .lower-bar{align-items:flex-start;flex-direction:column}
+  .teach-modal{padding:18px}
+  .conversation{height:240px}
+}
