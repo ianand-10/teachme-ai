@@ -46,15 +46,24 @@
 
   // ─── Default classrooms ───────────────────────────────────────────────────
   const base = [
-    ['Photosynthesis','Maya', 'curious', '#d86865','Explain how plants turn light into food.',    ['sunlight','chlorophyll','glucose']],
-    ['Algebra',       'Theo', 'careful', '#4b7bbd','Explain how to solve a simple equation.',     ['variable','balance','inverse operation']],
-    ['Storytelling',  'Iris', 'creative','#9b71ae','Explain how stories hold attention.',         ['character','conflict','setting']],
+    ['Physics',   'Sam',  'careful',  '#4b7bbd', 'Explain how forces, motion, and energy work.',         ['force','acceleration','Newton\'s laws','energy','momentum']],
+    ['Biology',   'Maya', 'curious',  '#d86865', 'Explain how living things are organised and function.', ['cell','DNA','evolution','homeostasis','ecosystem']],
+    ['Chemistry', 'Iris', 'creative', '#9b71ae', 'Explain how atoms bond and reactions happen.',          ['atom','bond','reaction','periodic table','molecule']],
   ];
+  // Names of the built-in classrooms so we know what to keep on "clear custom"
+  const BASE_NAMES = base.map(b => b[0]);
 
   let topics = (
     JSON.parse(localStorage.getItem('teachback-topics') || 'null') ||
     base.map(([name,persona,style,color,goal,ideas]) => ({name,persona,style,color,goal,ideas}))
   ).map(t => ({...t, goal: t.goal||`Teach the main ideas of ${t.name}.`, ideas: t.ideas||[]}));
+
+  // Migrate: if all stored topics are the old built-ins, reset to new defaults
+  const OLD_DEFAULTS = ['Photosynthesis','Algebra','Storytelling'];
+  if (topics.length > 0 && topics.every(t => OLD_DEFAULTS.includes(t.name))) {
+    topics = base.map(([name,persona,style,color,goal,ideas]) => ({name,persona,style,color,goal,ideas}));
+    localStorage.removeItem('teachback-topics');
+  }
 
   let progress = JSON.parse(localStorage.getItem('teachback-progress') || '{}');
   let conversationHistory = {};
@@ -260,28 +269,35 @@
     $('#portrait').style.background  =topic.color;
     $('#conversation').innerHTML     ='';
 
-    const ideasList=topic.ideas.join(', ');
-    const personalityDesc={
-      curious: 'curious and enthusiastic — you love asking "why?" and "what if?"',
-      careful: 'careful and analytical — you like step-by-step logic and often ask "how do we know?"',
-      creative:'creative and imaginative — you enjoy analogies, metaphors, and unusual connections',
-    }[topic.style]||'curious';
+    const ideasList = topic.ideas.join(', ');
+    const personalityMap = {
+      curious:  { desc: 'curious and enthusiastic',  voice: 'You often jump to conclusions and need to be corrected. You ask "why" a lot and wonder about edge cases.' },
+      careful:  { desc: 'careful and methodical',    voice: 'You want every step explained precisely. You get uncomfortable when something is skipped and you ask "how do we know that?"' },
+      creative: { desc: 'creative and lateral-thinking', voice: 'You try to link new things to unrelated everyday examples and often ask "is it kind of like...?" type questions.' },
+    };
+    const pm = personalityMap[topic.style] || personalityMap.curious;
 
-    conversationHistory[topic.name]=[{
-      role:'system',
+    conversationHistory[topic.name] = [{
+      role: 'system',
       content:
-        `You are ${topic.persona}, a ${personalityDesc} student. `+
-        `Your teacher is explaining "${topic.goal}" on the topic: ${topic.name}. `+
-        `Key concepts you must understand: ${ideasList}.\n\n`+
-        `Rules:\n`+
-        `- Ask ONE focused question per reply (never multiple at once)\n`+
-        `- Keep replies to 1-3 sentences maximum\n`+
-        `- React to what the teacher JUST said — show you were listening\n`+
-        `- Vary your approach: ask for examples, analogies, real-world uses, common mistakes, "what if" scenarios, or deeper clarifications\n`+
-        `- If a key concept (${ideasList}) has not been mentioned, steer toward it\n`+
-        `- Never give the answer yourself — you are here to learn\n`+
-        `- Embody your personality: ${personalityDesc}\n`+
-        `- No filler phrases like "Great!" or "That's interesting!" — get straight to your question`,
+        `You are ${topic.persona}, a ${pm.desc} high school student hearing about ${topic.name} for the first time.\n`+
+        `Lesson goal: "${topic.goal}"\n`+
+        `Key concepts your teacher needs to cover: ${ideasList}\n\n`+
+        `YOUR PERSONALITY: ${pm.voice}\n\n`+
+        `STRICT RULES — follow every one:\n`+
+        `1. ONE question per reply. Never ask two questions at once.\n`+
+        `2. Maximum 2 sentences. Be brief.\n`+
+        `3. ALWAYS react to something SPECIFIC the teacher just said. Quote or paraphrase their exact words.\n`+
+        `4. Rotate through these question types (don't repeat the same type twice in a row):\n`+
+        `   • Clarify a term: "Wait — when you say '[exact word they used]', do you mean ___ or ___?"\n`+
+        `   • Challenge a step: "You said [X] causes [Y] — but how does that actually happen?"\n`+
+        `   • Make a wrong guess to be corrected: "So is it basically like [wrong but relatable analogy]?"\n`+
+        `   • Edge case: "What if [specific variation on what they described]? Would it still work the same way?"\n`+
+        `   • Connect concepts: "Does [thing they mentioned] relate to [another key concept from: ${ideasList}]?"\n`+
+        `5. If the teacher is vague, push back specifically: "I'm still not sure about the [exact part] — can you explain that bit more?"\n`+
+        `6. Do NOT say "Great!", "I see!", "That makes sense!", or any filler before your question.\n`+
+        `7. Do NOT give the answer yourself.\n`+
+        `8. If a concept from (${ideasList}) hasn't come up yet, steer toward it naturally.`,
     }];
 
     bubble(`Hi! Our goal is: ${topic.goal} — can you walk me through it in your own words?`,'student');
@@ -385,6 +401,17 @@
     });
     save(); dlg.close(); e.target.reset();
   };
+
+  // Clear all custom (non-default) classrooms
+  function clearCustom() {
+    if (!confirm('Remove all your custom classrooms? The 3 default ones will stay.')) return;
+    topics = base.map(([name,persona,style,color,goal,ideas]) => ({name,persona,style,color,goal,ideas}));
+    // Wipe progress for removed classrooms too
+    Object.keys(progress).forEach(k => { if (!BASE_NAMES.includes(k)) delete progress[k]; });
+    conversationHistory = {};
+    save();
+  }
+  $('#clear-button').onclick = clearCustom;
 
   $('#teach-form').onsubmit=e=>{
     e.preventDefault();
