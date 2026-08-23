@@ -7,8 +7,13 @@
   x.imageSmoothingEnabled = false;
 
   // ─── OpenRouter config (key loaded from config.js, which is gitignored) ──
-  const OR_KEY   = window.OPENROUTER_KEY || '';
-  const OR_MODEL = 'google/gemma-3-27b-it:free';
+  const OR_KEY    = window.OPENROUTER_KEY || '';
+  const OR_MODELS = [
+    'google/gemma-4-31b-it:free',
+    'openrouter/free',
+    'nvidia/nemotron-3-nano-30b-a3b:free',
+    'nvidia/nemotron-3-super-120b-a12b:free',
+  ];
 
   // ─── Character sprite (flood-fill white -> transparent) ──────────────────
   const characterSheet = new Image();
@@ -158,9 +163,9 @@
     house(685,60,220,145,'#c66757');
     tree(40,255);tree(920,250);tree(95,530);tree(865,530);
     // title with pixel drop shadow
-    T('TEACHBACK ACADEMY',482,33,14,'#000000a0','center');
-    T('TEACHBACK ACADEMY',480,31,14,'#fff8d3',  'center');
-    T('COURTYARD',        480,225,9,'#2e5a48',  'center');
+    T('TEACHME.AI', 482, 33, 14, '#000000a0', 'center');
+    T('TEACHME.AI', 480, 31, 14, '#fff8d3',   'center');
+    T('COURTYARD',  480, 225, 9, '#2e5a48',   'center');
     topics.slice(0,6).forEach((t,i) => {
       const ax=[165,480,795,165,480,795][i], ay=i<3?200:430;
       R(ax-56,ay,   112,23,'#102d3fcc');
@@ -262,104 +267,131 @@
 
   // ─── Open lesson dialog ───────────────────────────────────────────────────
   function openLesson(){
-    $('#lesson-topic').textContent   =topic.name.toUpperCase();
-    $('#lesson-title').textContent   =`Teach ${topic.persona}`;
-    $('#lesson-subtitle').textContent=`Goal: ${topic.goal}`;
-    $('#portrait').textContent       =topic.persona[0];
-    $('#portrait').style.background  =topic.color;
-    $('#conversation').innerHTML     ='';
+    $('#lesson-topic').textContent   = topic.name.toUpperCase();
+    $('#lesson-title').textContent   = `Teach ${topic.persona}`;
+    $('#lesson-subtitle').textContent= `Goal: ${topic.goal}`;
+    $('#portrait').textContent       = topic.persona[0];
+    $('#portrait').style.background  = topic.color;
+    $('#conversation').innerHTML     = '';
 
     const ideasList = topic.ideas.join(', ');
     const personalityMap = {
-      curious:  { desc: 'curious and enthusiastic',  voice: 'You often jump to conclusions and need to be corrected. You ask "why" a lot and wonder about edge cases.' },
-      careful:  { desc: 'careful and methodical',    voice: 'You want every step explained precisely. You get uncomfortable when something is skipped and you ask "how do we know that?"' },
-      creative: { desc: 'creative and lateral-thinking', voice: 'You try to link new things to unrelated everyday examples and often ask "is it kind of like...?" type questions.' },
+      curious:  { desc: 'curious and enthusiastic',  voice: 'You ask "why" and "what if", test wild hypotheses, and explore fascinating edge cases.' },
+      careful:  { desc: 'careful and analytical',    voice: 'You want logical step-by-step clarity, challenge assumptions, and ask "how does that mechanism actually work?".' },
+      creative: { desc: 'creative and imaginative',  voice: 'You love relatable analogies, real-world metaphors, and comparing concepts to unexpected things.' },
     };
     const pm = personalityMap[topic.style] || personalityMap.curious;
 
-    conversationHistory[topic.name] = [{
-      role: 'system',
-      content:
-        `You are ${topic.persona}, a ${pm.desc} high school student hearing about ${topic.name} for the first time.\n`+
-        `Lesson goal: "${topic.goal}"\n`+
-        `Key concepts your teacher needs to cover: ${ideasList}\n\n`+
-        `YOUR PERSONALITY: ${pm.voice}\n\n`+
-        `STRICT RULES — follow every one:\n`+
-        `1. ONE question per reply. Never ask two questions at once.\n`+
-        `2. Maximum 2 sentences. Be brief.\n`+
-        `3. ALWAYS react to something SPECIFIC the teacher just said. Quote or paraphrase their exact words.\n`+
-        `4. Rotate through these question types (don't repeat the same type twice in a row):\n`+
-        `   • Clarify a term: "Wait — when you say '[exact word they used]', do you mean ___ or ___?"\n`+
-        `   • Challenge a step: "You said [X] causes [Y] — but how does that actually happen?"\n`+
-        `   • Make a wrong guess to be corrected: "So is it basically like [wrong but relatable analogy]?"\n`+
-        `   • Edge case: "What if [specific variation on what they described]? Would it still work the same way?"\n`+
-        `   • Connect concepts: "Does [thing they mentioned] relate to [another key concept from: ${ideasList}]?"\n`+
-        `5. If the teacher is vague, push back specifically: "I'm still not sure about the [exact part] — can you explain that bit more?"\n`+
-        `6. Do NOT say "Great!", "I see!", "That makes sense!", or any filler before your question.\n`+
-        `7. Do NOT give the answer yourself.\n`+
-        `8. If a concept from (${ideasList}) hasn't come up yet, steer toward it naturally.`,
-    }];
+    const intro = `Hi! Our lesson goal is: "${topic.goal}". Can you explain the main ideas to me in your own words?`;
 
-    bubble(`Hi! Our goal is: ${topic.goal} — can you walk me through it in your own words?`,'student');
+    conversationHistory[topic.name] = [
+      {
+        role: 'system',
+        content:
+          `You are ${topic.persona}, a real high school student having a 1-on-1 tutoring conversation with your teacher about ${topic.name}.\n` +
+          `Lesson goal: "${topic.goal}"\n` +
+          `Key concepts your teacher needs to teach you: ${ideasList}\n` +
+          `Personality: ${pm.desc} (${pm.voice})\n\n` +
+          `CRITICAL RULES FOR ASKING QUESTIONS:\n` +
+          `1. YOU ARE THE STUDENT, NOT THE TEACHER. Never lecture, explain the concept back, or give the answer.\n` +
+          `2. MULTI-TURN DIALOGUE: Always pay attention to the entire conversation history. Deepen the discussion with each reply.\n` +
+          `3. DIRECT FOLLOW-UP: Directly latch onto the specific idea, term, or claim the teacher just made in their latest message. Quote or refer to their specific point.\n` +
+          `4. QUESTION STYLES (ask ONE focused question per turn, max 2-3 sentences):\n` +
+          `   - Mechanism probe: "Wait, you said [X causes Y] — what is actually happening behind the scenes to make that happen?"\n` +
+          `   - Edge case / counter-example: "What happens if [scenario]? Does [concept] still hold true?"\n` +
+          `   - Misconception / wrong guess: "So is it like [relatable analogy]? Or am I misunderstanding?"\n` +
+          `   - Connection: "How does [what they just said] connect with [unmentioned key concept: ${ideasList}]?"\n` +
+          `5. DO NOT use boilerplate filler ("Great explanation!", "Thanks!", "I see!"). Jump right into your thought and question.\n` +
+          `6. Stay in character as a curious student trying to truly understand.`
+      },
+      { role: 'assistant', content: intro }
+    ];
+
+    bubble(intro, 'student');
     teach.showModal();
     setTimeout(()=>$('#teach-input').focus(),20);
   }
 
   // ─── AI answer via OpenRouter ─────────────────────────────────────────────
   async function aiAnswer(teacherMessage){
-    const hist=conversationHistory[topic.name];
-    hist.push({role:'user',content:teacherMessage});
+    const hist = conversationHistory[topic.name];
+    hist.push({ role: 'user', content: teacherMessage });
 
-    const q=progress[topic.name]||{xp:0,lessons:0,covered:{},turn:0};
-    topic.ideas.forEach(idea=>{
-      if(teacherMessage.toLowerCase().includes(idea.toLowerCase())) q.covered[idea]=true;
+    const q = progress[topic.name] || { xp: 0, lessons: 0, covered: {}, turn: 0 };
+    topic.ideas.forEach(idea => {
+      if (teacherMessage.toLowerCase().includes(idea.toLowerCase())) q.covered[idea] = true;
     });
-    q.xp+=10; q.lessons++; q.turn=(q.turn||0)+1;
-    progress[topic.name]=q;
+    q.xp += 10;
+    q.lessons++;
+    q.turn = (q.turn || 0) + 1;
+    progress[topic.name] = q;
     save();
 
     setInputLocked(true);
     showTyping();
 
-    let reply;
-    try{
-      const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
-        method:'POST',
-        headers:{
-          'Authorization':`Bearer ${OR_KEY}`,
-          'Content-Type':'application/json',
-          'HTTP-Referer':'https://teachback.academy',
-          'X-Title':'TeachBack Academy',
-        },
-        body:JSON.stringify({
-          model:OR_MODEL,
-          messages:hist,
-          max_tokens:160,
-          temperature:0.85,
-        }),
-      });
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data=await res.json();
-      reply=data.choices?.[0]?.message?.content?.trim();
-      if(!reply) throw new Error('Empty response');
-      hist.push({role:'assistant',content:reply});
-    }catch(err){
-      console.error('OpenRouter error:',err);
-      const miss=topic.ideas.find(i=>!q.covered[i]);
-      const fallbacks=[
-        `How does "${miss||topic.ideas[0]}" connect to what you just said?`,
-        `Can you give me a real-world example of that?`,
-        `What would happen if that part was missing?`,
-        `How would you explain this to someone who had never heard of ${topic.name}?`,
-        `What is the most common mistake people make when thinking about this?`,
-      ];
-      reply=fallbacks[(q.turn-1)%fallbacks.length];
+    let reply = null;
+
+    if (OR_KEY) {
+      for (const modelName of OR_MODELS) {
+        try {
+          const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${OR_KEY}`,
+              'Content-Type': 'application/json',
+              'HTTP-Referer': 'https://teachme.ai',
+              'X-Title': 'teachme.ai',
+            },
+            body: JSON.stringify({
+              model: modelName,
+              messages: hist,
+              max_tokens: 220,
+              temperature: 0.8,
+            }),
+          });
+
+          if (!res.ok) {
+            console.warn(`Model ${modelName} returned status ${res.status}`);
+            continue;
+          }
+
+          const data = await res.json();
+          if (data.error) {
+            console.warn(`Model ${modelName} returned error:`, data.error);
+            continue;
+          }
+
+          const content = data.choices?.[0]?.message?.content?.trim();
+          if (content) {
+            reply = content;
+            break;
+          }
+        } catch (err) {
+          console.warn(`Error calling ${modelName}:`, err);
+        }
+      }
     }
 
+    if (!reply) {
+      // Contextual fallback based on teacher's recent words & uncovered topics
+      const miss = topic.ideas.find(i => !q.covered[i]);
+      const fallbacks = [
+        `Wait, based on what you just said, how does "${miss || topic.ideas[0]}" actually connect to that?`,
+        `Can you give me a real-world scenario where that happens? What does it look like in action?`,
+        `What would happen if that condition wasn't met? Would the whole process stop?`,
+        `So is it kind of like [a chain reaction]? How do we know for sure that happens?`,
+        `If someone made a mistake with this, what would be the most common thing they misunderstand?`,
+      ];
+      reply = fallbacks[(q.turn - 1) % fallbacks.length];
+    }
+
+    hist.push({ role: 'assistant', content: reply });
+
     removeTyping();
-    bubble(reply,'student');
+    bubble(reply, 'student');
     setInputLocked(false);
-    setTimeout(()=>$('#teach-input').focus(),20);
+    setTimeout(()=>$('#teach-input').focus(), 20);
   }
 
   // ─── Act on E ─────────────────────────────────────────────────────────────

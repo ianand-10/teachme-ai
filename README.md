@@ -1,12 +1,10 @@
-# TeachBack Academy
+# teachme.ai
 
-A no-dependency, pixel-art teaching game built to deploy on GitHub Pages. It has locally saved classrooms, WASD/arrow-key movement, room entry, NPC interaction, a deterministic teaching-session demo, and a local report card.
+A zero-cost, pixel-art AI teaching simulation. Players teach AI students across custom and built-in classrooms (Physics, Biology, Chemistry). The AI student asks probing, multi-turn follow-up questions to test your depth of explanation and help you master topics via the Feynman technique.
 
-## Publish on GitHub Pages
+## Getting Started
 
-1. Create a GitHub repository and upload these files to its root.
-2. In the repository, open **Settings → Pages**.
-3. Set the source to **Deploy from a branch**, select `main` and `/ (root)`, then save.
-4. GitHub will give you the public site address within a few minutes.
+1. Copy `config.example.js` to `config.js`.
+2. Add your OpenRouter API key to `config.js` (free models are supported).
+3. Open `index.html` in your browser.
 
-No API key, build command, package install, or server is needed. Later, replace the local reply logic in `game.js` with a backend call once an AI provider is available.
