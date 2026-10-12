@@ -94,26 +94,22 @@
     };
     characterSheet.src = 'assets/character-sprites.png';
 
-    // ─── Default classrooms ───────────────────────────────────────────────────
-    const base = [
-      ['Physics',   'Sam',  'careful',  '#4b7bbd', 'Explain how forces, motion, and energy work.',         ['force','acceleration','Newton\'s laws','energy','momentum']],
-      ['Biology',   'Maya', 'curious',  '#d86865', 'Explain how living things are organised and function.', ['cell','DNA','evolution','homeostasis','ecosystem']],
-      ['Chemistry', 'Iris', 'creative', '#9b71ae', 'Explain how atoms bond and reactions happen.',          ['atom','bond','reaction','periodic table','molecule']],
-    ];
-    // Names of the built-in classrooms so we know what to keep on "clear custom"
-    const BASE_NAMES = base.map(b => b[0]);
-
-    let topics = (
-      JSON.parse(localStorage.getItem('teachback-topics') || 'null') ||
-      base.map(([name,persona,style,color,goal,ideas]) => ({name,persona,style,color,goal,ideas}))
-    ).map(t => ({...t, goal: t.goal||`Teach the main ideas of ${t.name}.`, ideas: t.ideas||[]}));
-
-    // Migrate: if all stored topics are the old built-ins, reset to new defaults
-    const OLD_DEFAULTS = ['Photosynthesis','Algebra','Storytelling'];
-    if (topics.length > 0 && topics.every(t => OLD_DEFAULTS.includes(t.name))) {
-      topics = base.map(([name,persona,style,color,goal,ideas]) => ({name,persona,style,color,goal,ideas}));
-      localStorage.removeItem('teachback-topics');
+    // ─── One-time migration: clear the old seeded classrooms so new users ──────
+    // start blank. Only runs if the stored set is entirely the untouched seeds,
+    // so anyone who added their own classrooms keeps everything.
+    const SEED_NAMES = ['Physics', 'Biology', 'Chemistry'];
+    if (!localStorage.getItem('teachback-reset-v2')) {
+      const stored = JSON.parse(localStorage.getItem('teachback-topics') || 'null');
+      if (stored && stored.length && stored.every(t => SEED_NAMES.includes(t.name))) {
+        localStorage.removeItem('teachback-topics');
+        localStorage.removeItem('teachback-progress');
+      }
+      localStorage.setItem('teachback-reset-v2', '1');
     }
+
+    // ─── State ─────────────────────────────────────────────────────────────────
+    let topics = (JSON.parse(localStorage.getItem('teachback-topics') || 'null') || [])
+      .map(t => ({ ...t, goal: t.goal || `the main ideas of ${t.name}`, ideas: t.ideas || [] }));
 
     let progress = JSON.parse(localStorage.getItem('teachback-progress') || '{}');
     let conversationHistory = {};
@@ -122,11 +118,15 @@
     let editingIndex = null; // index into topics when editing, else null
 
     const $ = s => document.querySelector(s);
-    const dlg   = $('#topic-dialog');
-    const manage= $('#manage-dialog');
-    const teach = $('#teach-dialog');
-    const report= $('#report-dialog');
-    const loc   = $('#location-label');
+    const dlg     = $('#topic-dialog');
+    const focusDlg= $('#focus-dialog');
+    const manage  = $('#manage-dialog');
+    const teach   = $('#teach-dialog');
+    const report  = $('#report-dialog');
+    const loc     = $('#location-label');
+
+    const anyDialogOpen = () => dlg.open || focusDlg.open || manage.open || teach.open || report.open;
+    const courtyardLabel = () => topics.length ? 'COURTYARD · Choose a classroom' : 'COURTYARD · Create your first classroom';
 
     // ─── Streak tracking (real, date-based) ────────────────────────────────────
     let streak = JSON.parse(localStorage.getItem('teachback-streak') || 'null') || { last: null, count: 0 };
@@ -152,6 +152,7 @@
     function save() {
       localStorage.setItem('teachback-topics',   JSON.stringify(topics));
       localStorage.setItem('teachback-progress', JSON.stringify(progress));
+      if (room === 'hub') loc.textContent = courtyardLabel();
       stats();
     }
     function stats() {
@@ -230,12 +231,19 @@
         const ax=[165,480,795,165,480,795][i], ay=i<3?200:430;
         R(ax-56,ay,   112,23,'#102d3fcc');
         R(ax-54,ay,   110, 2,'#1e5870aa');
-        T(t.name.toUpperCase(),ax,ay+16,8,'#fff6d1','center');
+        T(t.name.toUpperCase().slice(0,16),ax,ay+16,8,'#fff6d1','center');
         if(Math.hypot(p.x-ax,p.y-(ay+30))<94){
           R(ax-80,ay+36,160,23,'#122e40ee');
-          T(`E -> ENTER ${t.name.toUpperCase()}`,ax,ay+52,7,'#ffe89a','center');
+          T(`E -> ENTER`,ax,ay+52,7,'#ffe89a','center');
         }
       });
+      // Empty state: no classrooms yet
+      if(!topics.length){
+        R(250,255,460,78,'#102d3fe6');
+        R(252,257,456, 2,'#1e5870aa');
+        T('NO CLASSROOMS YET',480,290,12,'#fff6d1','center');
+        T('Tap "+ Create classroom" below to begin',480,312,8,'#ffe89a','center');
+      }
     }
 
     // ─── Classroom scene ──────────────────────────────────────────────────────
@@ -265,9 +273,9 @@
     function draw(){
       room==='hub'?hub():classroom();
       sprite({},p.x,p.y,true);
-      if(near()&&!teach.open){
-        R(310,158,340,26,'#102e40de');
-        T(`E -> TALK TO ${topic.persona.toUpperCase()}`,480,176,8,'#ffe89a','center');
+      if(near()&&!teach.open&&!focusDlg.open){
+        R(300,158,360,26,'#102e40de');
+        T(`E -> TEACH ${topic.persona.toUpperCase()}`,480,176,8,'#ffe89a','center');
       }
     }
 
@@ -281,11 +289,11 @@
     function leave(){
       room='hub'; topic=null;
       p={x:480,y:338,dir:'up',step:0};
-      loc.textContent='COURTYARD · Choose a classroom';
+      loc.textContent=courtyardLabel();
     }
 
     function move(dt){
-      if(dlg.open||manage.open||teach.open||report.open) return;
+      if(anyDialogOpen()) return;
       let a=0,b=0;
       if(K.has('arrowleft') ||K.has('a')){a=-1;p.dir='left';}
       if(K.has('arrowright')||K.has('d')){a= 1;p.dir='right';}
@@ -325,17 +333,29 @@
       if(el) el.remove();
     }
 
+    // ─── Per-lesson focus prompt ────────────────────────────────────────────────
+    function openFocusPrompt(){
+      $('#focus-heading').textContent = `Teach ${topic.persona} — what's today's topic?`;
+      $('#focus-input').value = topic.goal || '';
+      focusDlg.showModal();
+      setTimeout(()=>{ const el=$('#focus-input'); el.focus(); el.select(); }, 20);
+    }
+
     // ─── Open lesson dialog ───────────────────────────────────────────────────
-    function openLesson(){
+    function openLesson(focus){
+      const goal = (focus && focus.trim()) || topic.goal || `the main ideas of ${topic.name}`;
+
       $('#lesson-topic').textContent   = topic.name.toUpperCase();
       $('#lesson-title').textContent   = `Teach ${topic.persona}`;
-      $('#lesson-subtitle').textContent= `Goal: ${topic.goal}`;
+      $('#lesson-subtitle').textContent= `Focus: ${goal}`;
       $('#portrait').textContent       = topic.persona[0];
       $('#portrait').style.background  = topic.color;
       $('#conversation').innerHTML     = '';
       dlBubble = null;
 
-      const ideasList = topic.ideas.join(', ');
+      const ideasList = (topic.ideas && topic.ideas.length)
+        ? topic.ideas.join(', ')
+        : `the core concepts of ${topic.name}`;
       const personalityMap = {
         curious:  { desc: 'curious and enthusiastic',  voice: 'You ask "why" and "what if", test wild hypotheses, and explore fascinating edge cases.' },
         careful:  { desc: 'careful and analytical',    voice: 'You want logical step-by-step clarity, challenge assumptions, and ask "how does that mechanism actually work?".' },
@@ -343,27 +363,28 @@
       };
       const pm = personalityMap[topic.style] || personalityMap.curious;
 
-      const intro = `Hi! Our lesson goal is: "${topic.goal}". Can you explain the main ideas to me in your own words?`;
+      const intro = `Hi! Today you're teaching me about: "${goal}". Can you start explaining it to me in your own words?`;
 
       conversationHistory[topic.name] = [
         {
           role: 'system',
           content:
-            `You are ${topic.persona}, a real high school student having a 1-on-1 tutoring conversation with your teacher about ${topic.name}.\n` +
-            `Lesson goal: "${topic.goal}"\n` +
-            `Key concepts your teacher needs to teach you: ${ideasList}\n` +
+            `You are ${topic.persona}, a real high school student having a 1-on-1 tutoring conversation with your teacher.\n` +
+            `Today's topic (what the teacher wants to focus on): "${goal}"\n` +
+            `Related key concepts to probe for: ${ideasList}\n` +
             `Personality: ${pm.desc} (${pm.voice})\n\n` +
             `CRITICAL RULES FOR ASKING QUESTIONS:\n` +
             `1. YOU ARE THE STUDENT, NOT THE TEACHER. Never lecture, explain the concept back, or give the answer.\n` +
-            `2. MULTI-TURN DIALOGUE: Always pay attention to the entire conversation history. Deepen the discussion with each reply.\n` +
-            `3. DIRECT FOLLOW-UP: Directly latch onto the specific idea, term, or claim the teacher just made in their latest message. Quote or refer to their specific point.\n` +
-            `4. QUESTION STYLES (ask ONE focused question per turn, max 2-3 sentences):\n` +
+            `2. STAY ON TODAY'S TOPIC: "${goal}". Keep your questions focused on helping the teacher explain this specific thing.\n` +
+            `3. MULTI-TURN DIALOGUE: Always pay attention to the entire conversation history. Deepen the discussion with each reply.\n` +
+            `4. DIRECT FOLLOW-UP: Directly latch onto the specific idea, term, or claim the teacher just made in their latest message. Quote or refer to their specific point.\n` +
+            `5. QUESTION STYLES (ask ONE focused question per turn, max 2-3 sentences):\n` +
             `   - Mechanism probe: "Wait, you said [X causes Y] — what is actually happening behind the scenes to make that happen?"\n` +
             `   - Edge case / counter-example: "What happens if [scenario]? Does [concept] still hold true?"\n` +
             `   - Misconception / wrong guess: "So is it like [relatable analogy]? Or am I misunderstanding?"\n` +
-            `   - Connection: "How does [what they just said] connect with [unmentioned key concept: ${ideasList}]?"\n` +
-            `5. DO NOT use boilerplate filler ("Great explanation!", "Thanks!", "I see!"). Jump right into your thought and question.\n` +
-            `6. Stay in character as a curious student trying to truly understand.`
+            `   - Connection: "How does [what they just said] connect with [a related concept: ${ideasList}]?"\n` +
+            `6. DO NOT use boilerplate filler ("Great explanation!", "Thanks!", "I see!"). Jump right into your thought and question.\n` +
+            `7. Stay in character as a curious student trying to truly understand.`
         },
         { role: 'assistant', content: intro }
       ];
@@ -418,12 +439,12 @@
 
       if (!reply) {
         // Fallback: no WebGPU, model load failure, or generation error.
-        const miss = topic.ideas.find(i => !q.covered[i]);
+        const anchor = topic.ideas.find(i => !q.covered[i]) || topic.ideas[0] || topic.name;
         const fallbacks = [
-          `Wait, based on what you just said, how does "${miss || topic.ideas[0]}" actually connect to that?`,
+          `Wait, based on what you just said, how does "${anchor}" actually connect to that?`,
           `Can you give me a real-world scenario where that happens? What does it look like in action?`,
           `What would happen if that condition wasn't met? Would the whole process stop?`,
-          `So is it kind of like [a chain reaction]? How do we know for sure that happens?`,
+          `So is it kind of like a chain reaction? How do we know for sure that happens?`,
           `If someone made a mistake with this, what would be the most common thing they misunderstand?`,
         ];
         reply = fallbacks[(q.turn - 1) % fallbacks.length];
@@ -437,15 +458,15 @@
 
     // ─── Act on E ─────────────────────────────────────────────────────────────
     function act(){
-      if(dlg.open||manage.open||teach.open||report.open) return;
-      if(room==='room'&&near()){openLesson();return;}
+      if(anyDialogOpen()) return;
+      if(room==='room'&&near()){openFocusPrompt();return;}
       if(room==='hub'){
         topics.slice(0,6).some((t,i)=>{
           const ax=[165,480,795,165,480,795][i], ay=i<3?200:430;
           if(Math.hypot(p.x-ax,p.y-(ay+30))<94){
             topic=t; room='room';
             p={x:480,y:480,dir:'up',step:0};
-            loc.textContent=`${t.name.toUpperCase()} · Find ${t.persona}`;
+            loc.textContent=`${t.name.toUpperCase()} · Walk up to ${t.persona}`;
             return true;
           }
         });
@@ -457,7 +478,7 @@
       editingIndex = null;
       $('#topic-form').reset();
       $('#topic-eyebrow').textContent = 'NEW CLASSROOM';
-      $('#topic-heading').textContent = 'What will you teach?';
+      $('#topic-heading').textContent = 'Create a classroom';
       $('#topic-submit').textContent  = 'Create classroom';
       dlg.showModal();
     }
@@ -505,6 +526,16 @@
       save(); dlg.close(); e.target.reset();
     };
 
+    // ─── Focus form ──────────────────────────────────────────────────────────────
+    $('#focus-form').onsubmit=e=>{
+      e.preventDefault();
+      const f=$('#focus-input').value.trim();
+      if(!f) return;
+      focusDlg.close();
+      openLesson(f);
+    };
+    $('#focus-cancel').onclick=()=>focusDlg.close();
+
     // ─── Manage classrooms (edit / delete) ─────────────────────────────────────
     function renderManage(){
       const list = $('#manage-list');
@@ -516,7 +547,7 @@
 
         const label = document.createElement('span');
         label.className = 'manage-name';
-        label.textContent = t.name + (BASE_NAMES.includes(t.name) ? '  (default)' : '');
+        label.textContent = t.name;
 
         const actions = document.createElement('div');
         actions.className = 'manage-actions';
@@ -547,16 +578,16 @@
     $('#manage-button').onclick = () => { renderManage(); manage.showModal(); };
     $('#close-manage').onclick  = () => manage.close();
 
-    // Clear all custom (non-default) classrooms
-    function clearCustom() {
-      if (!confirm('Remove all your custom classrooms? The 3 default ones will stay.')) return;
-      topics = base.map(([name,persona,style,color,goal,ideas]) => ({name,persona,style,color,goal,ideas}));
-      // Wipe progress for removed classrooms too
-      Object.keys(progress).forEach(k => { if (!BASE_NAMES.includes(k)) delete progress[k]; });
+    // ─── Clear all classrooms ─────────────────────────────────────────────────────
+    function clearAll() {
+      if (!topics.length) return;
+      if (!confirm('Delete ALL classrooms and progress? This cannot be undone.')) return;
+      topics = [];
+      progress = {};
       conversationHistory = {};
       save();
     }
-    $('#clear-button').onclick = clearCustom;
+    $('#clear-button').onclick = clearAll;
 
     // ─── Teach form ─────────────────────────────────────────────────────────────
     $('#teach-form').onsubmit=e=>{
@@ -573,12 +604,12 @@
 
     $('#report-button').onclick=()=>{
       let all=0;
-      $('#report-list').innerHTML=topics.map(t=>{
+      $('#report-list').innerHTML = topics.length ? topics.map(t=>{
         const q=progress[t.name]||{xp:0,lessons:0,covered:{}};
         all+=q.xp||0;
         const covered=Object.keys(q.covered||{}).length;
         return `<div class="report-row"><span>${t.name}<small>${covered}/${t.ideas.length} key ideas</small></span><span>${q.lessons} lessons &middot; ${q.xp||0} XP</span></div>`;
-      }).join('');
+      }).join('') : '<p class="tiny">No classrooms yet. Create one and start teaching!</p>';
       $('#report-xp').textContent=all;
       report.showModal();
     };
@@ -610,6 +641,8 @@
       last=n; move(d); draw();
       requestAnimationFrame(loop);
     }
+    loc.textContent = courtyardLabel();
     stats();
     requestAnimationFrame(loop);
   })();
+
