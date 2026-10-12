@@ -1,4 +1,3 @@
-
   <!doctype html>
   <html lang="en">
     <head>
@@ -29,11 +28,11 @@
           </div>
         </section>
         <section class="lower-bar">
-          <p id="location-label">HALLWAY · Choose a classroom</p>
+          <p id="location-label">COURTYARD · Create your first classroom</p>
           <div class="lower-actions">
             <button class="primary-button" id="topic-button">+ Create classroom</button>
             <button class="ghost-button" id="manage-button">✎ Manage</button>
-            <button class="ghost-button" id="clear-button">🗑 Clear custom</button>
+            <button class="ghost-button" id="clear-button">🗑 Clear all</button>
           </div>
         </section>
       </main>
@@ -41,14 +40,24 @@
       <dialog id="topic-dialog" class="modal small-modal">
         <form id="topic-form">
           <button class="close" type="button" id="topic-cancel" aria-label="Close">×</button>
-          <p class="eyebrow" id="topic-eyebrow">NEW CLASSROOM</p><h2 id="topic-heading">What will you teach?</h2>
-          <label>Topic <input id="topic-name" required maxlength="32" placeholder="e.g. Photosynthesis" /></label>
+          <p class="eyebrow" id="topic-eyebrow">NEW CLASSROOM</p><h2 id="topic-heading">Create a classroom</h2>
+          <label>Classroom name <input id="topic-name" required maxlength="32" placeholder="e.g. Biology with Maya" /></label>
           <label>Student name <input id="persona-name" required maxlength="22" placeholder="e.g. Maya" /></label>
           <label>Student personality <select id="persona-style"><option value="curious">Curious and enthusiastic</option><option value="careful">Careful and analytical</option><option value="creative">Creative and
   imaginative</option></select></label>
-          <label>Learning goal <input id="topic-goal" required maxlength="110" placeholder="e.g. Explain how plants turn light into energy" /></label>
-          <label>Key ideas <input id="topic-ideas" required maxlength="180" placeholder="e.g. sunlight, chlorophyll, glucose (separate with commas)" /></label>
+          <label>Default topic focus <input id="topic-goal" required maxlength="140" placeholder="e.g. How living things are organised and function" /></label>
+          <label>Key ideas <small style="font-weight:400;color:#8a7466">(optional — helps the student probe)</small> <input id="topic-ideas" maxlength="180" placeholder="e.g. cell, DNA, evolution (separate with 
+  commas)" /></label>
           <button class="primary-button" id="topic-submit" type="submit">Create classroom</button>
+        </form>
+      </dialog>
+
+      <dialog id="focus-dialog" class="modal small-modal">
+        <form id="focus-form">
+          <button class="close" type="button" id="focus-cancel" aria-label="Close">×</button>
+          <p class="eyebrow">TODAY'S LESSON</p><h2 id="focus-heading">What's today's topic?</h2>
+          <label>Exactly what do you want to teach this session? <input id="focus-input" required maxlength="140" placeholder="e.g. How mitochondria produce energy" /></label>
+          <button class="primary-button" type="submit">Start lesson</button>
         </form>
       </dialog>
 
