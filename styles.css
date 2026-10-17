@@ -145,6 +145,7 @@
     background:var(--surface);color:var(--ink);box-shadow:var(--shadow-lg);
   }
   dialog.modal::backdrop{background:rgba(16,19,28,.4);backdrop-filter:blur(4px)}
+  dialog:not([open]){display:none !important;}   /* keep closed dialogs hidden */
   .modal h3{font-size:22px;margin-bottom:18px}
   .close{
     position:absolute;top:16px;right:18px;border:0;background:transparent;
