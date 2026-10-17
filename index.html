@@ -2,83 +2,105 @@
   <html lang="en">
     <head>
       <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-      <meta name="theme-color" content="#17233c" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta name="theme-color" content="#ffffff" />
       <title>teachme.ai</title>
       <link rel="stylesheet" href="styles.css" />
     </head>
     <body>
-      <main class="app-shell">
-        <header class="topbar">
-          <a class="brand" href="#" aria-label="teachme.ai home"><span>✦</span> TEACHME<br /><small>.AI</small></a>
-          <div class="stats" aria-label="Player progress"><span>⚡ <b id="xp-value">0</b> XP</span><span>🔥 <b id="streak-value">0</b> day streak</span></div>
-          <button class="icon-button" id="report-button" aria-label="Open report card">▤</button>
-        </header>
-        <section class="game-frame">
-          <canvas id="game" width="960" height="576" aria-label="A pixel art school. Use WASD or arrow keys to walk."></canvas>
-          <div class="game-hint" id="game-hint">WASD / ARROW KEYS TO EXPLORE</div>
-          <div class="touch-controls" id="touch-controls" aria-hidden="true">
-            <div class="dpad">
-              <button class="tc-btn tc-up"    data-key="w" aria-label="Move up">▲</button>
-              <button class="tc-btn tc-left"  data-key="a" aria-label="Move left">◀</button>
-              <button class="tc-btn tc-right" data-key="d" aria-label="Move right">▶</button>
-              <button class="tc-btn tc-down"  data-key="s" aria-label="Move down">▼</button>
-            </div>
-            <button class="tc-action" id="tc-action" aria-label="Interact (enter / talk)">E</button>
-          </div>
+      <header class="nav">
+        <a class="brand" href="#top"><span class="brand-mark">✦</span> teachme<span class="brand-dim">.ai</span></a>
+        <div class="nav-right">
+          <div class="stat"><span class="stat-ico">⚡</span><b id="xp-value">0</b><span class="stat-lbl">XP</span></div>
+          <div class="stat"><span class="stat-ico">🔥</span><b id="streak-value">0</b><span class="stat-lbl">day streak</span></div>
+          <button class="btn ghost" id="report-button">Report card</button>
+        </div>
+      </header>
+
+      <main id="top">
+        <section class="hero">
+          <p class="eyebrow">LEARN BY TEACHING</p>
+          <h1>Welcome, student 👋</h1>
+          <p class="hero-sub">The best way to learn something is to teach it. Pick a classroom, explain a topic in your own words, and your AI student will question and grade you until it really clicks.</p>
+          <button class="scroll-cue" id="scroll-cue" aria-label="Go to your classrooms">
+            <span>Your classrooms</span><span class="chev">↓</span>
+          </button>
         </section>
-        <section class="lower-bar">
-          <p id="location-label">COURTYARD · Create your first classroom</p>
-          <div class="lower-actions">
-            <button class="primary-button" id="topic-button">+ Create classroom</button>
-            <button class="ghost-button" id="manage-button">✎ Manage</button>
-            <button class="ghost-button" id="clear-button">🗑 Clear all</button>
+
+        <section class="classrooms" id="classrooms">
+          <div class="section-head">
+            <h2>Your classrooms</h2>
+            <button class="btn primary" id="new-classroom-btn">+ New classroom</button>
           </div>
+          <div class="grid" id="classroom-grid"></div>
         </section>
       </main>
 
-      <dialog id="topic-dialog" class="modal small-modal">
+      <footer class="footer">AI student runs privately in your browser · Lessons saved on this device</footer>
+
+      <!-- Create / edit classroom -->
+      <dialog id="topic-dialog" class="modal">
         <form id="topic-form">
           <button class="close" type="button" id="topic-cancel" aria-label="Close">×</button>
-          <p class="eyebrow" id="topic-eyebrow">NEW CLASSROOM</p><h2 id="topic-heading">Create a classroom</h2>
+          <p class="eyebrow" id="topic-eyebrow">NEW CLASSROOM</p>
+          <h3 id="topic-heading">Create a classroom</h3>
           <label>Classroom name <input id="topic-name" required maxlength="32" placeholder="e.g. Biology with Maya" /></label>
           <label>Student name <input id="persona-name" required maxlength="22" placeholder="e.g. Maya" /></label>
-          <label>Student personality <select id="persona-style"><option value="curious">Curious and enthusiastic</option><option value="careful">Careful and analytical</option><option value="creative">Creative and
-  imaginative</option></select></label>
+          <label>Student personality
+            <select id="persona-style">
+              <option value="curious">Curious and enthusiastic</option>
+              <option value="careful">Careful and analytical</option>
+              <option value="creative">Creative and imaginative</option>
+            </select>
+          </label>
           <label>Default topic focus <input id="topic-goal" required maxlength="140" placeholder="e.g. How living things are organised and function" /></label>
-          <label>Key ideas <small style="font-weight:400;color:#8a7466">(optional — helps the student probe)</small> <input id="topic-ideas" maxlength="180" placeholder="e.g. cell, DNA, evolution (separate with 
-  commas)" /></label>
-          <button class="primary-button" id="topic-submit" type="submit">Create classroom</button>
+          <label>Key ideas <span class="hint">(optional — helps the student probe)</span>
+            <input id="topic-ideas" maxlength="180" placeholder="e.g. cell, DNA, evolution (comma separated)" />
+          </label>
+          <button class="btn primary wide" id="topic-submit" type="submit">Create classroom</button>
         </form>
       </dialog>
 
-      <dialog id="focus-dialog" class="modal small-modal">
+      <!-- Per-lesson topic focus -->
+      <dialog id="focus-dialog" class="modal">
         <form id="focus-form">
           <button class="close" type="button" id="focus-cancel" aria-label="Close">×</button>
-          <p class="eyebrow">TODAY'S LESSON</p><h2 id="focus-heading">What's today's topic?</h2>
-          <label>Exactly what do you want to teach this session? <input id="focus-input" required maxlength="140" placeholder="e.g. How mitochondria produce energy" /></label>
-          <button class="primary-button" type="submit">Start lesson</button>
+          <p class="eyebrow">TODAY'S LESSON</p>
+          <h3 id="focus-heading">What's today's topic?</h3>
+          <label>Exactly what do you want to teach this session?
+            <input id="focus-input" required maxlength="140" placeholder="e.g. How mitochondria produce energy" />
+          </label>
+          <button class="btn primary wide" type="submit">Start lesson →</button>
         </form>
       </dialog>
 
-      <dialog id="manage-dialog" class="modal small-modal">
-        <button class="close" type="button" id="close-manage" aria-label="Close">×</button>
-        <p class="eyebrow">CLASSROOMS</p><h2>Manage classrooms</h2>
-        <div id="manage-list" class="manage-list"></div>
-      </dialog>
-
+      <!-- Lesson / chat -->
       <dialog id="teach-dialog" class="modal teach-modal">
-        <section class="lesson-head"><div class="student-portrait" id="portrait">M</div><div><p class="eyebrow" id="lesson-topic">SCIENCE</p><h2 id="lesson-title">Teach Maya</h2><p id="lesson-subtitle">Explain it
-  in your own words. I’ll ask questions.</p></div><button class="close" id="end-lesson" aria-label="End lesson">×</button></section>
+        <section class="lesson-head">
+          <div class="avatar" id="portrait">M</div>
+          <div class="lesson-head-text">
+            <p class="eyebrow" id="lesson-topic">TOPIC</p>
+            <h3 id="lesson-title">Teach Maya</h3>
+            <p class="muted" id="lesson-subtitle">Focus</p>
+          </div>
+          <button class="close" id="end-lesson" aria-label="End lesson">×</button>
+        </section>
         <div id="conversation" class="conversation" aria-live="polite"></div>
-        <form id="teach-form" class="teach-form"><input id="teach-input" autocomplete="off" placeholder="Start teaching…" /><button class="primary-button">Send</button></form>
-        <p class="tiny">Lessons saved on this device &middot; AI student runs privately in your browser</p>
+        <form id="teach-form" class="teach-form">
+          <input id="teach-input" autocomplete="off" placeholder="Explain in your own words…" />
+          <button class="btn primary" type="submit">Send</button>
+        </form>
       </dialog>
 
-      <dialog id="report-dialog" class="modal small-modal report-modal">
-        <button class="close" id="close-report" aria-label="Close">×</button><p class="eyebrow">YOUR PROGRESS</p><h2>Report card</h2>
-        <div class="score"><strong id="report-xp">0</strong><span>Total XP</span></div><div id="report-list" class="report-list"></div>
+      <!-- Report card -->
+      <dialog id="report-dialog" class="modal">
+        <button class="close" id="close-report" aria-label="Close">×</button>
+        <p class="eyebrow">YOUR PROGRESS</p>
+        <h3>Report card</h3>
+        <div class="score"><strong id="report-xp">0</strong><span>Total XP</span></div>
+        <div id="report-list" class="report-list"></div>
       </dialog>
-      <script src="game.js"></script>
+
+      <script src="app.js"></script>
     </body>
   </html>
