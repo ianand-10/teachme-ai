@@ -6,7 +6,7 @@
     window.addEventListener('error', e => console.error('[teachme] error:', e.message, e.error));
     window.addEventListener('unhandledrejection', e => console.error('[teachme] promise rejection:', e.reason));
 
-    // ─── In-browser AI (WebLLM / WebGPU) ──────────────────────────────────────
+    // --- In-browser AI (WebLLM / WebGPU) --------------------------------------
     const WEBLLM_URL    = 'https://esm.run/@mlc-ai/web-llm';
     const PRIMARY_MODEL = 'Qwen2.5-3B-Instruct-q4f16_1-MLC';
     const LIGHT_MODEL   = 'Llama-3.2-1B-Instruct-q4f16_1-MLC';
@@ -21,7 +21,8 @@
       if (!enginePromise) {
         enginePromise = (async () => {
           const webllm = await import(WEBLLM_URL);
-          engine = await webllm.CreateMLCEngine(pickModel(), { initProgressCallback: r => onProgress && onProgress(r) });
+          engine = await webllm.CreateMLCEngine(pickModel(), { initProgressCallback: r => onProgress && onProgress(r)
+  });
           return engine;
         })().catch(err => { console.error('[teachme] WebLLM init failed:', err); enginePromise = null; return null; });
       }
@@ -32,16 +33,17 @@
       if (engineState === 'ready' || engineState === 'loading') return;
       if (!('gpu' in navigator)) {
         engineState = 'unsupported';
-        setStatus('Basic mode — this browser has no WebGPU (try Chrome/Edge)', 'basic');
+        setStatus('Basic mode - this browser has no WebGPU (try Chrome/Edge)', 'basic');
         return;
       }
       engineState = 'loading';
-      setStatus('Loading AI model… 0%', 'loading');
+      setStatus('Loading AI model... 0%', 'loading');
       ensureEngine(r => {
-        if (r && typeof r.progress === 'number') setStatus(`Loading AI model… ${Math.round(r.progress * 100)}%`, 'loading');
+        if (r && typeof r.progress === 'number') setStatus(`Loading AI model... ${Math.round(r.progress * 100)}%`,
+  'loading');
       }).then(eng => {
-        if (eng) { engineState = 'ready'; setStatus('AI ready ✓', 'ready'); }
-        else     { engineState = 'error'; setStatus('Basic mode — AI model couldn’t load (see console)', 'basic'); }
+        if (eng) { engineState = 'ready'; setStatus('AI ready', 'ready'); }
+        else     { engineState = 'error'; setStatus('Basic mode - AI model could not load (see console)', 'basic'); }
       });
     }
 
@@ -72,7 +74,8 @@
       localStorage.setItem('teachback-streak', JSON.stringify(streak));
     }
 
-    const dlg = $('#topic-dialog'), focusDlg = $('#focus-dialog'), teach = $('#teach-dialog'), report = $('#report-dialog');
+    const dlg = $('#topic-dialog'), focusDlg = $('#focus-dialog'), teach = $('#teach-dialog'), report =
+  $('#report-dialog');
     const COLORS = ['#4f46e5','#0ea5e9','#db2777','#059669','#d97706','#7c3aed'];
     const initials = n => ((n || '?').trim()[0] || '?').toUpperCase();
 
@@ -87,6 +90,8 @@
       $('#streak-value').textContent = streak.count || 0;
     }
 
+    function ensureStatusEl() {
+      if (statusEl && document.body.contains(statusEl)) return statusEl;
     function ensureStatusEl() {
       if (statusEl && document.body.contains(statusEl)) return statusEl;
       statusEl = document.createElement('span');
@@ -120,14 +125,14 @@
           <div class="room-top">
             <div class="avatar" style="background:${t.color}">${esc(initials(t.persona))}</div>
             <div class="room-menu">
-              <button class="iconbtn" data-act="edit" title="Edit">✎</button>
-              <button class="iconbtn" data-act="del" title="Delete">🗑</button>
+              <button class="iconbtn" data-act="edit" title="Edit">&#9998;</button>
+              <button class="iconbtn" data-act="del" title="Delete">&#128465;</button>
             </div>
           </div>
           <h3>${esc(t.name)}</h3>
           <p class="room-focus">${esc(t.goal)}</p>
-          <div class="room-meta"><span>🎓 ${esc(t.persona)}</span><span>⚡ ${q.xp || 0} XP</span></div>
-          <button class="btn primary start-btn">Start lesson →</button>`;
+          <div class="room-meta"><span>&#127891; ${esc(t.persona)}</span><span>&#9889; ${q.xp || 0} XP</span></div>
+          <button class="btn primary start-btn">Start lesson &#8594;</button>`;
         card.querySelector('.start-btn').onclick = () => { topic = t; openFocusPrompt(); };
         card.querySelector('[data-act="edit"]').onclick = () => openEdit(i);
         card.querySelector('[data-act="del"]').onclick  = () => deleteTopic(i);
@@ -190,7 +195,7 @@
     }
 
     function openFocusPrompt() {
-      $('#focus-heading').textContent = `Teach ${topic.persona} — what's today's topic?`;
+      $('#focus-heading').textContent = `Teach ${topic.persona} - what's today's topic?`;
       $('#focus-input').value = topic.goal || '';
       focusDlg.showModal();
       setTimeout(() => { const el = $('#focus-input'); el.focus(); el.select(); }, 20);
@@ -219,14 +224,14 @@
         `Key concepts to probe for: ${ideasList}\n` +
         `Personality: ${pm.desc} (${pm.voice})\n\n` +
         `HOW TO BEHAVE:\n` +
-        `1. YOU ARE THE STUDENT. Never lecture or give the full answer yourself — your job is to be taught, question, and assess.\n` +
+        `1. YOU ARE THE STUDENT. Never lecture or give the full answer yourself - your job is to be taught, question, and assess.\n` +
         `2. START the lesson: greet the teacher in one short line, then ask ONE focused question about today's topic to get them explaining.\n` +
-        `3. GRADE EVERY EXPLANATION — never just agree or say "great job". After each thing the teacher says:\n` +
+        `3. GRADE EVERY EXPLANATION - never just agree or say "great job". After each thing the teacher says:\n` +
         `   - Say briefly what was correct/clear.\n` +
-        `   - Point out what was vague, incomplete, or WRONG — and explain why it's off.\n` +
+        `   - Point out what was vague, incomplete, or WRONG - and explain why it's off.\n` +
         `   - Give a quick honest rating on its own line: "Understanding: X/10".\n` +
         `   - Then ask ONE focused follow-up question that targets the biggest gap.\n` +
-        `4. If the teacher is clearly wrong, respectfully push back and correct the misconception — don't pretend to be convinced.\n` +
+        `4. If the teacher is clearly wrong, respectfully push back and correct the misconception - don't pretend to be convinced.\n` +
         `5. Keep replies concise (3-6 sentences). No filler. Stay in character as a sharp, engaged student.`
       );
     }
@@ -240,7 +245,7 @@
       $('#portrait').style.background   = topic.color;
       $('#conversation').innerHTML      = '';
       ensureStatusEl();
-      if (engineState === 'ready') setStatus('AI ready ✓', 'ready');
+      if (engineState === 'ready') setStatus('AI ready', 'ready');
       conversationHistory[topic.name] = [
         { role: 'system', content: systemPrompt(goal) },
         { role: 'user',   content: `I'm ready to teach you about "${goal}". Greet me in one short line and ask your first question to get me started.` },
@@ -264,7 +269,7 @@
           reply = res?.choices?.[0]?.message?.content?.trim() || null;
         } catch (err) {
           console.error('[teachme] generation error:', err);
-          setStatus('Basic mode — generation error (see console)', 'basic');
+          setStatus('Basic mode - generation error (see console)', 'basic');
           engineState = 'error';
         }
         removeTyping();
@@ -281,13 +286,13 @@
       const hist = conversationHistory[topic.name];
       const spoken = hist.filter(m => m.role === 'assistant').length;
       if (spoken === 0) {
-        return `Hi, I'm ${topic.persona}! To start — can you explain, in your own words, what "${goal || topic.name}" actually is and why it matters?`;
+        return `Hi, I'm ${topic.persona}! To start - can you explain, in your own words, what "${goal || topic.name}" actually is and why it matters?`;
       }
       const q = progress[topic.name] || { turn: 1, covered: {} };
       const anchor = (topic.ideas.find(i => !(q.covered || {})[i])) || topic.ideas[0] || topic.name;
       const graded = [
         `That part was clear, but it felt vague on the "why".\nUnderstanding: 5/10.\nCan you be specific about how "${anchor}" actually fits in?`,
-        `Nice — you connected a few ideas there.\nUnderstanding: 7/10.\nWhat happens in an edge case where that doesn't hold?`,
+        `Nice - you connected a few ideas there.\nUnderstanding: 7/10.\nWhat happens in an edge case where that doesn't hold?`,
         `Hmm, I'm not convinced that's fully right.\nUnderstanding: 4/10.\nCan you walk me through the mechanism step by step?`,
         `Good, that mostly made sense.\nUnderstanding: 8/10.\nHow does this relate to "${anchor}"?`,
       ];
@@ -339,7 +344,7 @@
         const q = progress[t.name] || { xp: 0, lessons: 0, covered: {} };
         all += q.xp || 0;
         const covered = Object.keys(q.covered || {}).length;
-        return `<div class="report-row"><span>${esc(t.name)}<small>${covered}/${t.ideas.length} key ideas</small></span><span>${q.lessons || 0} sessions · ${q.xp || 0} XP</span></div>`;
+        return `<div class="report-row"><span>${esc(t.name)}<small>${covered}/${t.ideas.length} key ideas</small></span><span>${q.lessons || 0} sessions &middot; ${q.xp || 0} XP</span></div>`;
       }).join('') : '<p class="muted">No classrooms yet. Create one and start teaching!</p>';
       $('#report-xp').textContent = all;
       report.showModal();
