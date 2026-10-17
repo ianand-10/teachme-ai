@@ -9,24 +9,53 @@
     </head>
     <body>
       <header class="nav">
-        <a class="brand" href="#top"><span class="brand-mark">✦</span> teachme<span class="brand-dim">.ai</span></a>
+        <a class="brand" href="#top"><span class="brand-mark">&#10022;</span> teachme<span 
+  class="brand-dim">.ai</span></a>
         <div class="nav-right">
-          <div class="stat"><span class="stat-ico">⚡</span><b id="xp-value">0</b><span class="stat-lbl">XP</span></div>
-          <div class="stat"><span class="stat-ico">🔥</span><b id="streak-value">0</b><span class="stat-lbl">day streak</span></div>
+          <div class="stat"><span class="stat-ico">&#9889;</span><b id="xp-value">0</b><span 
+  class="stat-lbl">XP</span></div>
+          <div class="stat"><span class="stat-ico">&#128293;</span><b id="streak-value">0</b><span class="stat-lbl">day
+  streak</span></div>
           <button class="btn ghost" id="report-button">Report card</button>
         </div>
       </header>
 
       <main id="top">
-        <section class="hero">
-          <p class="eyebrow">LEARN BY TEACHING</p>
-          <h1>Welcome, student 👋</h1>
-          <p class="hero-sub">The best way to learn something is to teach it. Pick a classroom, explain a topic in your own words, and your AI student will question and grade you until it really clicks.</p>
-          <button class="scroll-cue" id="scroll-cue" aria-label="Go to your classrooms">
-            <span>Your classrooms</span><span class="chev">↓</span>
-          </button>
+        <!-- Hallway (the game view) -->
+        <section class="stage" id="stage" aria-label="School hallway">
+          <div class="world" id="world">
+            <div class="bg-ceiling"></div>
+            <div class="bg-wall"></div>
+            <div class="bg-floor"></div>
+            <div class="wall" id="wall"></div>
+            <div class="player" id="player"><div class="char"><div class="ava"></div><div 
+  class="torso"></div></div></div>
+          </div>
+          <div class="stage-top">
+            <span class="hall-title">HALLWAY</span>
+            <span class="hall-sub" id="empty-hint">No classrooms yet - walk to the "+" door and press E to create
+  one.</span>
+          </div>
+          <p class="hud-hint">A / D or Left / Right to walk &middot; E or Up to enter a door</p>
+          <div class="touch" id="touch">
+            <button class="tc" id="tc-left" aria-label="Walk left">&#8592;</button>
+            <button class="tc" id="tc-enter" aria-label="Enter">E</button>
+            <button class="tc" id="tc-right" aria-label="Walk right">&#8594;</button>
+          </div>
         </section>
 
+        <!-- Kept in the DOM as the data + action source for game.js (hidden by game.js) -->
+        <section class="hero">
+          <p class="eyebrow">LEARN BY TEACHING</p>
+          <h1>Welcome, student &#128075;</h1>
+          <p class="hero-sub">Pick a classroom, explain a topic in your own words, and your AI student will question and
+  grade you.</p>
+          <button class="scroll-cue" id="scroll-cue"><span>Your classrooms</span><span 
+          <p class="eyebrow">LEARN BY TEACHING</p>
+          <h1>Welcome, student &#128075;</h1>
+          <p class="hero-sub">Pick a classroom, explain a topic in your own words, and your AI student will question and grade you.</p>
+          <button class="scroll-cue" id="scroll-cue"><span>Your classrooms</span><span class="chev">&#8595;</span></button>
+        </section>
         <section class="classrooms" id="classrooms">
           <div class="section-head">
             <h2>Your classrooms</h2>
@@ -36,12 +65,12 @@
         </section>
       </main>
 
-      <footer class="footer">AI student runs privately in your browser · Lessons saved on this device</footer>
+      <footer class="footer">AI student runs privately in your browser &middot; Lessons saved on this device</footer>
 
       <!-- Create / edit classroom -->
       <dialog id="topic-dialog" class="modal">
         <form id="topic-form">
-          <button class="close" type="button" id="topic-cancel" aria-label="Close">×</button>
+          <button class="close" type="button" id="topic-cancel" aria-label="Close">&times;</button>
           <p class="eyebrow" id="topic-eyebrow">NEW CLASSROOM</p>
           <h3 id="topic-heading">Create a classroom</h3>
           <label>Classroom name <input id="topic-name" required maxlength="32" placeholder="e.g. Biology with Maya" /></label>
@@ -54,7 +83,7 @@
             </select>
           </label>
           <label>Default topic focus <input id="topic-goal" required maxlength="140" placeholder="e.g. How living things are organised and function" /></label>
-          <label>Key ideas <span class="hint">(optional — helps the student probe)</span>
+          <label>Key ideas <span class="hint">(optional - helps the student probe)</span>
             <input id="topic-ideas" maxlength="180" placeholder="e.g. cell, DNA, evolution (comma separated)" />
           </label>
           <button class="btn primary wide" id="topic-submit" type="submit">Create classroom</button>
@@ -64,13 +93,13 @@
       <!-- Per-lesson topic focus -->
       <dialog id="focus-dialog" class="modal">
         <form id="focus-form">
-          <button class="close" type="button" id="focus-cancel" aria-label="Close">×</button>
+          <button class="close" type="button" id="focus-cancel" aria-label="Close">&times;</button>
           <p class="eyebrow">TODAY'S LESSON</p>
           <h3 id="focus-heading">What's today's topic?</h3>
           <label>Exactly what do you want to teach this session?
             <input id="focus-input" required maxlength="140" placeholder="e.g. How mitochondria produce energy" />
           </label>
-          <button class="btn primary wide" type="submit">Start lesson →</button>
+          <button class="btn primary wide" type="submit">Start lesson</button>
         </form>
       </dialog>
 
@@ -83,18 +112,18 @@
             <h3 id="lesson-title">Teach Maya</h3>
             <p class="muted" id="lesson-subtitle">Focus</p>
           </div>
-          <button class="close" id="end-lesson" aria-label="End lesson">×</button>
+          <button class="close" id="end-lesson" aria-label="End lesson">&times;</button>
         </section>
         <div id="conversation" class="conversation" aria-live="polite"></div>
         <form id="teach-form" class="teach-form">
-          <input id="teach-input" autocomplete="off" placeholder="Explain in your own words…" />
+          <input id="teach-input" autocomplete="off" placeholder="Explain in your own words..." />
           <button class="btn primary" type="submit">Send</button>
         </form>
       </dialog>
 
       <!-- Report card -->
       <dialog id="report-dialog" class="modal">
-        <button class="close" id="close-report" aria-label="Close">×</button>
+        <button class="close" id="close-report" aria-label="Close">&times;</button>
         <p class="eyebrow">YOUR PROGRESS</p>
         <h3>Report card</h3>
         <div class="score"><strong id="report-xp">0</strong><span>Total XP</span></div>
@@ -102,5 +131,6 @@
       </dialog>
 
       <script src="app.js"></script>
+      <script src="game.js"></script>
     </body>
   </html>
