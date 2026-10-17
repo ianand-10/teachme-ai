@@ -1,4 +1,4 @@
-⏺ (() => {
+  (() => {
     const $ = s => document.querySelector(s);
     const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -222,10 +222,10 @@
         `1. YOU ARE THE STUDENT. Never lecture or give the full answer yourself — your job is to be taught, question, and assess.\n` +
         `2. START the lesson: greet the teacher in one short line, then ask ONE focused question about today's topic to get them explaining.\n` +
         `3. GRADE EVERY EXPLANATION — never just agree or say "great job". After each thing the teacher says:\n` +
-        `   • Say briefly what was correct/clear.\n` +
-        `   • Point out what was vague, incomplete, or WRONG — and explain why it's off.\n` +
-        `   • Give a quick honest rating on its own line: "Understanding: X/10".\n` +
-        `   • Then ask ONE focused follow-up question that targets the biggest gap.\n` +
+        `   - Say briefly what was correct/clear.\n` +
+        `   - Point out what was vague, incomplete, or WRONG — and explain why it's off.\n` +
+        `   - Give a quick honest rating on its own line: "Understanding: X/10".\n` +
+        `   - Then ask ONE focused follow-up question that targets the biggest gap.\n` +
         `4. If the teacher is clearly wrong, respectfully push back and correct the misconception — don't pretend to be convinced.\n` +
         `5. Keep replies concise (3-6 sentences). No filler. Stay in character as a sharp, engaged student.`
       );
