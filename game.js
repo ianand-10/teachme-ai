@@ -4,6 +4,7 @@
      styles.css are untouched. */
   (() => {
     const $ = (s) => document.querySelector(s);
+    const $ = (s) => document.querySelector(s);
     const $$ = (s) => Array.from(document.querySelectorAll(s));
     const escapeHtml = (s) =>
       String(s).replace(/[&<>"]/g, (c) =>
@@ -365,44 +366,6 @@
           k,
         )
       )
-        e.preventDefault();
-      keys.add(k);
-      if (k === "e" || k === "arrowup") interact();
-    });
-    window.addEventListener("keyup", (e) =>
-      keys.delete((e.key || "").toLowerCase()),
-    );
-
-    function hold(id, key) {
-      const el = $(id);
-      if (!el) return;
-      const dn = (e) => {
-        e.preventDefault();
-        keys.add(key);
-      };
-      const up = (e) => {
-        e.preventDefault();
-        keys.delete(key);
-      };
-      el.addEventListener("pointerdown", dn);
-      el.addEventListener("pointerup", up);
-      el.addEventListener("pointerleave", up);
-      el.addEventListener("pointercancel", up);
-    }
-    hold("#tc-left", "arrowleft");
-    hold("#tc-right", "arrowright");
-    const te = $("#tc-enter");
-    if (te)
-      te.addEventListener("pointerdown", (e) => {
-        e.preventDefault();
-        interact();
-      });
-
-    // --- Keep hallway synced when app.js re-renders the grid ---------
-    const grid = $("#classroom-grid");
-    if (grid)
-      new MutationObserver(scheduleRender).observe(grid, {
-        childList: true,
         e.preventDefault();
       keys.add(k);
       if (k === "e" || k === "arrowup") interact();
