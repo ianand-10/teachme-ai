@@ -1,6 +1,6 @@
 # teachme.ai
 
-A zero-cost, pixel-art AI teaching simulation. Players teach AI students across custom and built-in classrooms (Physics, Biology, Chemistry). The AI student asks probing, multi-turn follow-up questions to test your depth of explanation and help you master topics via the Feynman technique.
+A zero-cost, pixel-art AI teaching simulation. Players teach AI students across custom and built-in classrooms. The AI student asks probing, multi-turn follow-up questions to test your depth of explanation and help you master topics via the Feynman technique - like they say, teaching is the most effective way to master the content!
 
 ## Getting Started
 
