@@ -208,7 +208,8 @@
         node.classList.contains("typing-bubble") ||
         node.classList.contains("progress-bubble");
       const S = (k, v) => node.style.setProperty(k, v, "important");
-      S("align-self", isPlayer ? "flex-end" : "flex-start");
+ S("align-self", isPlayer ? "flex-end" : "flex-start");
+      S("flex", "0 0 auto");
       S("max-width", "80%");
       S("margin", "0 0 10px 0");
       S("white-space", "normal");
@@ -216,6 +217,9 @@
       if (isDots) {
         S("display", "flex");
         S("align-items", "center");
+      } else {
+        S("display", "block");
+        S("width", "fit-content");
       }
     }
   
