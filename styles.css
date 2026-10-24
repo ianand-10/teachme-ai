@@ -298,3 +298,60 @@ input:focus,select:focus{outline:none;border-color:var(--accent);
   .teach-form input{width:0;min-width:0}
   .teach-form button{flex-shrink:0}
 }
+
+/* -- Chat alignment override --------------------------------------- */
+#conversation {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  padding: 18px 8px !important;
+  gap: 14px !important;
+}
+
+/* All bubbles size to their content instead of filling the row */
+#conversation .bubble {
+  display: block !important;
+  box-sizing: border-box !important;
+  width: fit-content !important;
+  max-width: 82% !important;
+  min-width: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  white-space: pre-wrap !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* Your messages: right side */
+#conversation .bubble.player {
+  align-self: flex-end !important;
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+/* AI messages and typing indicator: left side */
+#conversation .bubble.student {
+  align-self: flex-start !important;
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+
+/* Keep the typing indicator compact */
+#conversation .typing-bubble {
+  display: flex !important;
+  width: fit-content !important;
+  min-width: 64px !important;
+}
+
+@media (max-width: 560px) {
+  #conversation {
+    padding: 14px 4px !important;
+    gap: 12px !important;
+  }
+
+  #conversation .bubble {
+    max-width: 90% !important;
+  }
+}
