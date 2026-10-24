@@ -11,7 +11,8 @@
     html:has(dialog[open]){overflow:hidden;}
     #teach-dialog.teach-modal{height:min(86vh,620px);}
     #conversation{display:flex !important;flex-direction:column !important;}
-    #conversation .bubble{max-width:80% !important;
+     #conversation .bubble{display:block !important;flex:0 0 auto !important;
+    width:fit-content !important;max-width:80% !important;
     margin:0 0 10px 0 !important;overflow-wrap:anywhere !important;
     white-space:normal !important;}
     #conversation .bubble.player{align-self:flex-end !important;}
