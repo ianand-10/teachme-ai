@@ -182,9 +182,18 @@ input:focus,select:focus{outline:none;border-color:var(--accent);
   box-shadow:0 0 0 3px var(--accent-weak)}
 
 /* -- Teach dialog -------------------------------------------------- */
-.teach-modal{width:min(620px,calc(100vw - 24px));max-height:88vh;
-  display:flex;flex-direction:column;padding:22px}
+.teach-modal{
+  width:min(620px,calc(100vw - 24px));
+  height:min(700px,88vh);
+  max-height:88vh;
+  min-height:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  padding:22px;
+}
 .lesson-head{display:flex;align-items:center;gap:14px;
+  flex:0 0 auto;
   border-bottom:1px solid var(--line);padding-bottom:16px}
 .lesson-head-text{min-width:0}
 .lesson-head-text h3{font-size:19px;margin:2px 0}
@@ -192,65 +201,94 @@ input:focus,select:focus{outline:none;border-color:var(--accent);
   overflow:hidden;text-overflow:ellipsis}
 .lesson-head .close{position:static;margin-left:auto}
 
-/* -- Chat (fixed bubble alignment and wrapping) -------------------- */
-.conversation{
-  flex:1;
+/* -- Chat: alignment, bubble sizing, and scrolling ----------------- */
+#conversation.conversation{
+  flex:1 1 0;
   min-height:0;
-  max-height:48vh;
-  overflow-y:auto;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  padding:18px 8px;
+  max-height:none;
   width:100%;
   min-width:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:12px;
+
+  padding:18px 8px;
+  scrollbar-gutter:stable;
 }
-.bubble{
-  display:block;
+
+/* Shared message bubble styles */
+#conversation .bubble{
   box-sizing:border-box;
+  display:block;
+  flex:0 0 auto;
+
   width:fit-content;
   max-width:82%;
   min-width:0;
+
   margin:0;
   padding:11px 15px;
+
   border-radius:16px;
   font-size:14.5px;
   line-height:1.5;
+
   animation:pop .16s ease;
   white-space:pre-wrap;
   overflow-wrap:anywhere;
   word-break:normal;
 }
-@keyframes pop{
-  from{opacity:0;transform:translateY(4px)}
-  to{opacity:1;transform:translateY(0)}
-}
-.bubble.student{
+
+/* AI messages: left side */
+#conversation .bubble.student{
   align-self:flex-start;
+  margin-left:0;
+  margin-right:auto;
+
   background:var(--bg);
   border:1px solid var(--line);
   border-bottom-left-radius:5px;
 }
-.bubble.player{
+
+/* Your messages: right side */
+#conversation .bubble.player{
   align-self:flex-end;
+  margin-left:auto;
+  margin-right:0;
+
+  width:fit-content;
+  max-width:82%;
+  min-width:0;
+
   background:var(--accent);
   color:#fff;
   border-bottom-right-radius:5px;
 }
-.progress-bubble{
-  font-style:italic;
-  color:var(--muted);
-  font-size:13px;
-}
-.typing-bubble{
+
+/* Typing indicator */
+#conversation .typing-bubble{
   display:flex;
+  flex:0 0 auto;
   align-items:center;
   gap:6px;
+
   width:fit-content;
   min-width:64px;
+  max-width:82%;
   padding:12px 16px;
 }
-.typing-bubble .dot{flex:0 0 7px}
+#conversation .typing-bubble .dot{flex:0 0 7px}
+
+.progress-bubble{font-style:italic;color:var(--muted);font-size:13px}
+
+@keyframes pop{
+  from{opacity:0;transform:translateY(4px)}
+  to{opacity:1;transform:translateY(0)}
+}
 .dot{width:7px;height:7px;border-radius:50%;background:#aab;
   animation:bounce 1.1s infinite ease-in-out}
 .dot:nth-child(2){animation-delay:.18s}
@@ -258,9 +296,22 @@ input:focus,select:focus{outline:none;border-color:var(--accent);
 @keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.5}
   40%{transform:translateY(-6px);opacity:1}}
 
-.teach-form{display:flex;gap:10px;padding-top:14px;
-  border-top:1px solid var(--line)}
-.teach-form input{flex:1;min-width:0}
+/* Keep the message input anchored below the scrolling chat */
+#teach-form.teach-form{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+}
+#teach-form input{
+  flex:1 1 auto;
+  width:0;
+  min-width:0;
+}
+#teach-form button{flex:0 0 auto}
 
 /* -- Report -------------------------------------------------------- */
 .score{text-align:center;background:var(--accent-weak);
@@ -286,72 +337,25 @@ input:focus,select:focus{outline:none;border-color:var(--accent);
   .grid{grid-template-columns:1fr}
   dialog.modal{padding:22px}
 
-  .conversation{
+  dialog.modal.teach-modal{
+    width:calc(100vw - 24px);
+    height:92dvh;
+    max-height:92dvh;
+    padding:16px;
+  }
+
+  #conversation.conversation{
+    min-height:0;
     max-height:none;
     padding:14px 4px;
+    gap:12px;
   }
-  .bubble{
+
+  #conversation .bubble,
+  #conversation .bubble.player{
     max-width:90%;
     font-size:14px;
   }
-  .teach-form{gap:8px}
-  .teach-form input{width:0;min-width:0}
-  .teach-form button{flex-shrink:0}
-}
 
-/* -- Chat alignment override --------------------------------------- */
-#conversation {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  padding: 18px 8px !important;
-  gap: 14px !important;
-}
-
-/* All bubbles size to their content instead of filling the row */
-#conversation .bubble {
-  display: block !important;
-  box-sizing: border-box !important;
-  width: fit-content !important;
-  max-width: 82% !important;
-  min-width: 0 !important;
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-  white-space: pre-wrap !important;
-  overflow-wrap: anywhere !important;
-}
-
-/* Your messages: right side */
-#conversation .bubble.player {
-  align-self: flex-end !important;
-  margin-left: auto !important;
-  margin-right: 0 !important;
-}
-
-/* AI messages and typing indicator: left side */
-#conversation .bubble.student {
-  align-self: flex-start !important;
-  margin-left: 0 !important;
-  margin-right: auto !important;
-}
-
-/* Keep the typing indicator compact */
-#conversation .typing-bubble {
-  display: flex !important;
-  width: fit-content !important;
-  min-width: 64px !important;
-}
-
-@media (max-width: 560px) {
-  #conversation {
-    padding: 14px 4px !important;
-    gap: 12px !important;
-  }
-
-  #conversation .bubble {
-    max-width: 90% !important;
-  }
+  #teach-form.teach-form{gap:8px}
 }
